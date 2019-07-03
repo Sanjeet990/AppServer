@@ -6,8 +6,6 @@ var MongoClient = require('mongodb').MongoClient;
 
 var url = "mongodb://marswavehome.tk:27017/smarthome";
 
-let serviceAccount = require('./secrets.json');
-
 const {AuthenticationClient} = require('auth0');
 const auth0 = new AuthenticationClient({
   'clientId': 'v12WpZgnb7rdCH8opzT0I03Zirux4Lm2',
@@ -20,18 +18,15 @@ async function asyncForEach(array, callback) {
   }
 }
 
-const {smarthome} = require('actions-on-google');
-const app = smarthome({
-  jwt: require('./secrets.json')
-});
-
 const getEmail = async (headers) => {
-  const accessToken = headers.authorization.substr(7);
-  const {email} = await auth0.getProfile(accessToken);
-  return email;
+	try{
+		const accessToken = headers.authorization.substr(7);
+		const {email} = await auth0.getProfile(accessToken);
+		return email;
+	}catch(e){
+		return null;
+	}
 }
-
-var port = process.env.PORT || 3000;
 
 function initDBConnection(){
 	return new Promise(function(resolve, reject) {
@@ -129,160 +124,28 @@ function prepareDeviceData(userEmail){
 	})
 }
 
-app.onSync(async (body, headers) => {
-	const userEmail = await getEmail(headers);
-	//const userEmail = "sanjeet.pathak990@gmail.com";
-	var devices = await prepareDeviceData(userEmail);
-	var data = {
-		requestId: body.requestId,
-		payload: {
-			  agentUserId: userEmail,
-			  devices
-		}
-	};
-	//console.log(JSON.stringify(data, null, 4));
-	return data;
-});
+const app = express();
 
-
-app.onQuery(async (body, headers) => {
-	// TODO Get device state
+app.get('/', async function (req, res) {
 	try{
-		const userId = await getEmail(headers);
-		const { devices } = body.inputs[0].payload;
-		const deviceStates = {};
-		var dbo = await initDBConnection();
-
-		const start = async () => {
-			await asyncForEach(devices, async (device) => {
-			  const state = await checkDevice(userId, device.id, dbo);
-			  if(state.length > 0){
-				deviceStates[device.id] = {
-						on: state[0].running,
-						online: true
-				};
-			  }else{
-				deviceStates[device.id] = {};
-			  }
-			});
-		} 
-		await start();
-		const myObject = {
-			  requestId: body.requestId,
-			  payload: {
-				devices: deviceStates,
-			  },
-			};
-		//console.log(JSON.stringify(myObject, null, 4));
-		return myObject;
-	}catch(e){
-	  //console.log(e.getmessage);
-	}
-});
-
-function checkDevice(userEmail, deviceID, dbo){
-	return new Promise(function(resolve, reject) {
-		// Query database
-		var query = { _id: deviceID };
-		dbo.collection("status").find(query).toArray(function(err, result) {
-			if (err){
-				reject(err);
-			}else{
-				var filtered = result.filter(function (el) {
-					return el != null;
-				});
-				resolve(filtered);
-			}
-		})
-    })
-}
-  
-app.onDisconnect((body, headers) => {
-  // TODO Disconnect user account from Google Assistant
-  // You can return an empty body
-  return {};
-});
-
-app.onExecute(async (body, headers) => {
-	const userId = await getEmail(headers);
-	
-	const commands = [{
-		ids: [],
-		status: 'SUCCESS',
-		states: {},
-	}];
-
-	const { devices, execution } = await body.inputs[0].payload.commands[0];
-	var dbo = await initDBConnection();
-
-	var fineDevices = await devices.filter(function (el) {
-		return el != null;
-	});
-
-	await asyncForEach(fineDevices, async (device) => {
-		try{
-			var state = await doExecute(userId, device.id, execution[0], dbo);
-			commands[0].ids.push(device.id);
-			commands[0].states = {
-				on: state[0].running,
-				online: true
-			};
-			// Report state back to Homegraph
-			app.reportState({
-				agentUserId: userId,
-				requestId: body.requestId,
+		const userEmail = await getEmail(req.headers);
+		//const userEmail = "sanjeet.pathak990@gmail.com";
+		if(userEmail != undefined && userEmail != null && userEmail != ""){
+			//console.log(userEmail);
+			var devices = await prepareDeviceData(userEmail);
+			var data = {
 				payload: {
-					devices: {
-						states: {
-							[device.id]: commands[0].states,
-						},
-					},
-				},
-			});
-		}catch (e) {
-			commands.push({
-				ids: [device.id],
-				status: 'ERROR',
-				errorCode: e.message,
-			});
-		}
-	});
-	var data =  {
-			requestId: body.requestId,
-			payload: {
-				commands,
-			},
-		  };
-	return data;
-});
-
-function doExecute(userId, deviceId, execution, dbo){
-	return new Promise(function(resolve, reject) {
-		// Query database
-		var query = { _id: deviceId };
-		dbo.collection("status").find(query).count(function(err, result) {
-			if (err){
-				reject(err);
-			}else{
-				switch (execution.command) {
-					// action.devices.traits.ArmDisarm
-					case 'action.devices.commands.OnOff':
-						var newvalues = { $set: {lastonline: new Date().getTime(), running: execution.params.on } };
-						dbo.collection("status").findOneAndUpdate(query, newvalues, {upsert:true,strict: false});
-						resolve(dbo.collection("status").find(query).toArray());
-						break;
-					// action.devices.traits.OpenClose
-					default:
-						reject(new Error('actionNotAvailable' + execution.command));
+					agentUserId: userEmail,
+					devices
 				}
-			}
-		})
-    })
-}
-
-express().get('/status', function (req, res) {
-	res.send('Hello World');
- })
+			};
+			res.send(data);
+		}else{
+			res.send("Invalid token supplied.");
+		}
+	}catch(e){
+		res.send("Error occurred!");
+	}
+})
  
- 
-express().use(bodyParser.json(), app).listen(port);
+app.listen(3001, () => console.log(`Example app listening.!`))
