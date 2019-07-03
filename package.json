@@ -2,9 +2,9 @@
   "name": "MarswaveHome",
   "version": "1.0.0",
   "description": "The Cloud Management Portal",
-  "main": "index.js",
+  "main": "appServer.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node appServer.js"
   },
   "engines": {
     "node": "8"
