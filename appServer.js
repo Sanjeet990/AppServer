@@ -141,8 +141,8 @@ app.get('/', async function (req, res) {
  
 app.get('/exists', async function (req, res) {
 	try{
-		//const userEmail = await getEmail(req.headers);
-		const userEmail = "sanjeet.pathak991@gmail.com";
+		const userEmail = await getEmail(req.headers);
+		//const userEmail = "sanjeet.pathak991@gmail.com";
 		var deviceId = req.query.deviceId;
 
 		var promiseMongo = initDBConnection();
