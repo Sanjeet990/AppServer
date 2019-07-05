@@ -6,6 +6,8 @@ var MongoClient = require('mongodb').MongoClient;
 
 var url = "mongodb://marswavehome.tk:27017/smarthome";
 
+var port = process.env.PORT || 3001;
+
 const {AuthenticationClient} = require('auth0');
 const auth0 = new AuthenticationClient({
   'clientId': 'v12WpZgnb7rdCH8opzT0I03Zirux4Lm2',
@@ -167,4 +169,4 @@ app.get('/exists', async function (req, res) {
 	}
 })
  
-app.listen(3001, () => console.log(`Example app listening.!`))
+app.listen(port, () => console.log("Example app listening.! " + port))
