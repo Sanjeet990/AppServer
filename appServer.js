@@ -60,58 +60,49 @@ function findDevices(userEmail, dbo){
 }
 
 function findSubDevices(devices, dbo){
+	// Query database by iterating over
+	let promises = [];
+
+	devices.forEach(device => {
+		promises.push(new Promise(async function(resolve, reject) {
+			var subDevices = listSubDevices(device, dbo);
+			subDevices.then(function(data){
+				resolve(data);
+			}, function(error){
+				reject(error);
+			});
+    	}))
+	});	
+	return Promise.all(promises);
+}
+
+function listSubDevices(device, dbo){
 	return new Promise(function(resolve, reject) {
 		// Query database by iterating over
-		var subDevices = [];
-		devices.forEach(device => {
-			var query = { _id: device };
-			dbo.collection("devices").find(query).toArray(function(err, result) {
-				result.forEach(subDevice => {
-					if (err){
-						reject(err);
-					}else{
-						var filtered = result[0].subDevices.filter(function (el) {
-							return el != null;
-						});
-						resolve(filtered);
-					}
-				});
-			})
-		});
+		var query = { _id: device };
+		dbo.collection("devices").find(query).toArray(function(err, result) {
+			result.forEach(subDevice => {
+				if (err){
+					reject(err);
+				}else{
+					resolve(subDevice);
+				}
+			});
+		})
     })
 }
 
 function prepareDeviceData(userEmail){
 	return new Promise(function(resolve, reject) {
-		const devices = [];
-		
 		var promiseMongo = initDBConnection();
 
 		promiseMongo.then(function(dbo){
 			//console.log("Connected to mongo database. " + dbo.domain);
 			findDevices(userEmail, dbo).then(function(devicex){
+				const subDevices = [];
 				findSubDevices(devicex, dbo).then(function(subDevice){
-					subDevice.forEach(data => {	
-						const deviceData = {
-							"id": data.id,
-							"type": data.type,
-							"traits": [data.traits],
-							"name": {
-								"defaultNames": [data.defaultNames],
-								"name": data.name,
-								"nicknames": [data.nicknames]
-							},
-							"willReportState": false,
-							"deviceInfo": {
-								"manufacturer": "Marswave SmartHome",
-								"model": data.model,
-								"hwVersion": data.hwVersion,
-								"swVersion": data.swVersion
-							}
-						};
-						devices.push(deviceData);
-					});
-					resolve(devices);
+					//console.log(JSON.stringify(subDevice, null, 4));
+					resolve(subDevice);
 				}, function(error){
 					reject("Error: " + error);
 				})
@@ -144,7 +135,35 @@ app.get('/', async function (req, res) {
 			res.send("Invalid token supplied.");
 		}
 	}catch(e){
-		res.send("Error occurred!");
+		res.send("error");
+	}
+})
+ 
+app.get('/exists', async function (req, res) {
+	try{
+		//const userEmail = await getEmail(req.headers);
+		const userEmail = "sanjeet.pathak991@gmail.com";
+		var deviceId = req.query.deviceId;
+
+		var promiseMongo = initDBConnection();
+
+		promiseMongo.then(function(dbo){
+			dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
+				if(err){
+					res.send("error");
+				}else{
+					if(result[0] == undefined || result[0] == null) res.send("okay");
+					else if(result[0]._id == userEmail) res.send("duplicate");
+					else res.send("exists:" + result[0]._id);
+				}
+				//console.log(JSON.stringify(result, null, 4));
+			})
+		}, function(error){
+			res.send("error");
+		})
+		//res.send("okay");
+	}catch(e){
+		res.send("error" + e);
 	}
 })
  
