@@ -152,6 +152,7 @@ app.get('/add', async function (req, res) {
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
 			var secretkey = req.body.secretKey;
+			console.log(JSON.stringify(req, null, 4));
 			res.send(deviceId + " - " + secretkey + "");
 			res.end();
 		}else{
