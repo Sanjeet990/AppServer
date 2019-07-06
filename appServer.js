@@ -48,13 +48,16 @@ function findDevices(userEmail, dbo){
 	return new Promise(function(resolve, reject) {
 		// Query database
 		var query = { _id: userEmail };
+		var filtered = [];
 		dbo.collection("users").find(query).toArray(function(err, result) {
 			if (err){
 				reject(err);
 			}else{
-				var filtered = result[0].devices.filter(function (el) {
-					return el != null;
-				});
+				if(result.length > 0){
+					filtered = result[0].devices.filter(function (el) {
+						return el != null;
+					});
+				}
 				resolve(filtered);
 			}
 		})
@@ -152,7 +155,6 @@ app.post('/add', async function (req, res) {
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
 			var secretkey = req.body.secretKey;
-			console.log(req.body);
 			res.send(deviceId + " - " + secretkey + "");
 			res.end();
 		}else{
