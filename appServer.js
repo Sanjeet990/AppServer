@@ -118,6 +118,10 @@ function prepareDeviceData(userEmail){
 }
 
 const app = express();
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
 
 app.get('/', async function (req, res) {
 	try{
@@ -133,6 +137,23 @@ app.get('/', async function (req, res) {
 				}
 			};
 			res.send(data);
+		}else{
+			res.send("Invalid token supplied.");
+		}
+	}catch(e){
+		res.send("error");
+	}
+})
+ 
+app.get('/add', async function (req, res) {
+	try{
+		//const userEmail = await getEmail(req.headers);
+		const userEmail = "sanjeet.pathak990@gmail.com";
+		if(userEmail != undefined && userEmail != null && userEmail != ""){
+			var deeviceId = req.body.deviceId;
+			var secretkey = req.body.secretKey;
+			res.send(deviceId + " - " + secretkey + "");
+			res.end();
 		}else{
 			res.send("Invalid token supplied.");
 		}
