@@ -97,6 +97,47 @@ function listSubDevices(device, dbo){
     })
 }
 
+function VerifyDeviceKey(device, key, dbo){
+	return new Promise(function(resolve, reject) {
+		// Query database by iterating over
+		var query = { _id: device };
+		dbo.collection("devices").find(query).toArray(function(err, result) {
+			if (err){
+				reject("error");
+			}else{
+				if(result.length > 0){
+					if(result[0].key == key){
+						resolve("ok");
+					}else{
+						reject("invalid");
+					}
+				}else{
+					reject("notfound");
+				}
+			}
+		})
+    })
+}
+
+function AddDeviceToUser(device, email, dbo){
+	return new Promise(function(resolve, reject) {
+		// Query database by iterating over
+		try{
+			dbo.collection("users").findByIdAndUpdate(email,{$push: {devices: device}},{safe: true, upsert: true},
+				function(err, doc) {
+					if(err){
+						reject(err);
+					}else{
+						resolve("ioko");
+					}
+				}
+			);
+		}catch(e){
+			reject(e);
+		}
+    })
+}
+
 function prepareDeviceData(userEmail){
 	return new Promise(function(resolve, reject) {
 		var promiseMongo = initDBConnection();
@@ -119,6 +160,7 @@ function prepareDeviceData(userEmail){
 		})	
 	})
 }
+
 
 const app = express();
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
@@ -153,8 +195,42 @@ app.post('/add', async function (req, res) {
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
 			var secretkey = req.body.secretKey;
-			res.send(deviceId + " - " + secretkey + "");
-			res.end();
+
+			var promiseMongo = initDBConnection();
+
+			promiseMongo.then(function(dbo){
+				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
+					if(err){
+						res.send("error");
+					}else{
+						if(result[0] == undefined || result[0] == null){
+							var promiseDeviceVerify = VerifyDeviceKey(deviceId, secretkey, dbo);
+							promiseDeviceVerify.then(async function(data){
+								dbo.collection("users").findOneAndUpdate({ _id: userEmail }, {$push: {devices: deviceId}}, {upsert:true,strict: false},
+									function(err, doc) {
+										if(err){
+											res.send("unknown");
+										}else{
+											res.send("okay");
+										}
+									}
+								);
+							}, function(error){
+								res.send(error);
+							})
+						}else if(result[0]._id == userEmail){
+							res.send("duplicate");
+						}else{
+							res.send("exists:" + result[0]._id);
+						}
+					}
+				})
+			}, function(error){
+				res.send("error");
+			})
+
+			//res.send(deviceId + " - " + secretkey + "");
+			//res.end(promiseDeviceVerify);
 		}else{
 			res.send("Invalid token supplied.");
 		}
