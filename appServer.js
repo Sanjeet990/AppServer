@@ -150,7 +150,7 @@ app.get('/add', async function (req, res) {
 		//const userEmail = await getEmail(req.headers);
 		const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
-			var deeviceId = req.body.deviceId;
+			var deeviceId = req.body.deviceID;
 			var secretkey = req.body.secretKey;
 			res.send(deviceId + " - " + secretkey + "");
 			res.end();
