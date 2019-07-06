@@ -158,7 +158,7 @@ app.get('/add', async function (req, res) {
 			res.send("Invalid token supplied.");
 		}
 	}catch(e){
-		res.send("error");
+		res.send("error " + e);
 	}
 })
  
