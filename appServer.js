@@ -145,7 +145,7 @@ app.get('/', async function (req, res) {
 	}
 })
  
-app.get('/add', async function (req, res) {
+app.post('/add', async function (req, res) {
 	try{
 		//const userEmail = await getEmail(req.headers);
 		const userEmail = "sanjeet.pathak990@gmail.com";
