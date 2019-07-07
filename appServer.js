@@ -171,7 +171,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 app.get('/', async function (req, res) {
 	try{
 		const userEmail = await getEmail(req.headers);
-		//const userEmail = "sanjeet.pathak991@gmail.com";
+		//const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			//console.log(userEmail);
 			var devices = await prepareDeviceData(userEmail);
@@ -231,6 +231,47 @@ app.post('/add', async function (req, res) {
 
 			//res.send(deviceId + " - " + secretkey + "");
 			//res.end(promiseDeviceVerify);
+		}else{
+			res.send("Invalid token supplied.");
+		}
+	}catch(e){
+		res.send("error " + e);
+	}
+})
+ 
+app.post('/remove', async function (req, res) {
+	try{
+		const userEmail = await getEmail(req.headers);
+		//const userEmail = "sanjeet.pathak990@gmail.com";
+		if(userEmail != undefined && userEmail != null && userEmail != ""){
+			var deviceId = req.body.deviceID;
+			var promiseMongo = initDBConnection();
+
+			promiseMongo.then(function(dbo){
+				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
+					if(err){
+						res.send("error");
+					}else{
+						if(result[0] == undefined || result[0] == null){
+							req.send("notexists");
+						}else if(result[0]._id == userEmail){
+							dbo.collection("users").findOneAndUpdate({ _id: userEmail }, {$pop: {devices: deviceId}}, {upsert:true,strict: false},
+								function(err, doc) {
+									if(err){
+										res.send("unknown");
+									}else{
+										res.send("okay");
+									}
+								}
+							);
+						}else{
+							res.send("autherror");
+						}
+					}
+				})
+			}, function(error){
+				res.send("error");
+			})
 		}else{
 			res.send("Invalid token supplied.");
 		}
