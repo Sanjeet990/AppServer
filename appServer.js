@@ -188,6 +188,35 @@ app.get('/', async function (req, res) {
 	}
 })
  
+app.get('/status', async function (req, res) {
+	try{
+		const userEmail = await getEmail(req.headers);
+		var deviceId = req.body.deviceID;
+		
+		if(userEmail != undefined && userEmail != null && userEmail != ""){
+			var data = [];
+			var deviceData = await dbo.collection("devices").find({ _id: deviceId }).toArray()
+			
+			var promise = new Promise((resolve, reject) => {
+				deviceData[0].subDevices.forEach(async (dataX, index, array) => {	
+					var dataArray = await dbo.collection("status").find({ _id: dataX.id }).toArray();
+					dataArray.forEach(singleObj => {
+						data.push({"id" : singleObj._id, "status" : singleObj.running});
+					});
+					if(index === array.length - 1) resolve();
+				});		
+			});
+			promise.then(() => {
+				res.send(JSON.stringify(data, null, 4));
+			});
+		}else{
+			res.send("Invalid token supplied.");
+		}
+	}catch(e){
+		res.send("error");
+	}
+})
+ 
 app.post('/add', async function (req, res) {
 	try{
 		const userEmail = await getEmail(req.headers);
