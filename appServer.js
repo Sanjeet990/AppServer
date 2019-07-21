@@ -358,19 +358,19 @@ app.post('/setType', async function (req, res) {
 						res.send("error");
 					}else{
 						if(result[0] == undefined || result[0] == null){
-							res.send("notexistsx");
+							res.send("notexists");
 						}else{
 							dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
 								if(err){
 									res.send("error");
 								}else{
 									if(result[0] == undefined || result[0] == null){
-										req.send("notexists");
+										res.send("notexists");
 									}else if(result[0]._id == userEmail){
 										dbo.collection("devices").findOneAndUpdate({ _id: deviceId }, {$set: {"subDevices.$.traits": type}}, {upsert:true,strict: false},
 											function(err, doc) {
 												if(err){
-													res.send("unknown");
+													res.send("unknown" + err);
 												}else{
 													res.send("okay");
 												}
