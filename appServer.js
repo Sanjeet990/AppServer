@@ -337,5 +337,59 @@ app.get('/exists', async function (req, res) {
 		res.send("error" + e);
 	}
 })
+
+
+app.post('/setType', async function (req, res) {
+	try{
+		const userEmail = await getEmail(req.headers);
+		//const userEmail = "sanjeet.pathak990@gmail.com";
+		if(userEmail != undefined && userEmail != null && userEmail != ""){
+			var deviceId = req.body.deviceID;
+			var SubDeviceId = req.body.subDeviceID;
+			var type = req.body.type;
+			var promiseMongo = initDBConnection();
+
+			promiseMongo.then(function(dbo){
+				dbo.collection("devices").find({"_id":deviceId, "subDevices":{$all :[SubDeviceId]}}).toArray(function(err, result) {
+					if(err){
+						res.send("error");
+					}else{
+						if(result[0] == undefined || result[0] == null){
+							req.send("notexists");
+						}else{
+							dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
+								if(err){
+									res.send("error");
+								}else{
+									if(result[0] == undefined || result[0] == null){
+										req.send("notexists");
+									}else if(result[0]._id == userEmail){
+										dbo.collection("devices").findOneAndUpdate({ _id: deviceId }, {$set: {"subDevices.$.traits": type}}, {upsert:true,strict: false},
+											function(err, doc) {
+												if(err){
+													res.send("unknown");
+												}else{
+													res.send("okay");
+												}
+											}
+										);
+									}else{
+										res.send("autherror");
+									}
+								}
+							})
+						}
+					}
+				})
+			}, function(error){
+				res.send("error");
+			})
+		}else{
+			res.send("Invalid token supplied.");
+		}
+	}catch(e){
+		res.send("error " + e);
+	}
+})
  
 app.listen(port, () => console.log("Example app listening.! " + port))
