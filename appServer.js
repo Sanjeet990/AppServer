@@ -396,8 +396,8 @@ app.post('/setType', async function (req, res) {
  
 app.post('/renameSubDevice', async function (req, res) {
 	try{
-		const userEmail = await getEmail(req.headers);
-		//const userEmail = "sanjeet.pathak990@gmail.com";
+		//const userEmail = await getEmail(req.headers);
+		const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
 			var SubDeviceId = req.body.subDeviceID;
