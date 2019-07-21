@@ -353,7 +353,7 @@ app.post('/setType', async function (req, res) {
 			console.log(SubDeviceId);
 
 			promiseMongo.then(function(dbo){
-				dbo.collection("devices").find({"_id":deviceId, "subDevices":{$all :[SubDeviceId]}}).toArray(function(err, result) {
+				dbo.collection("devices").find({"_id":deviceId, "subDevices":{$all :[{"id" : SubDeviceId}]}}).toArray(function(err, result) {
 					if(err){
 						res.send("error");
 					}else{
