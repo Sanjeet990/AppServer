@@ -338,11 +338,10 @@ app.get('/exists', async function (req, res) {
 	}
 })
 
-
 app.post('/setType', async function (req, res) {
 	try{
-		//const userEmail = await getEmail(req.headers);
-		const userEmail = "sanjeet.pathak990@gmail.com";
+		const userEmail = await getEmail(req.headers);
+		//const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
 			var SubDeviceId = req.body.subDeviceID;
@@ -367,7 +366,63 @@ app.post('/setType', async function (req, res) {
 									if(result[0] == undefined || result[0] == null){
 										res.send("notexists");
 									}else if(result[0]._id == userEmail){
-										dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": SubDeviceId}, {$set: {"subDevices.$.traits": type}}, {upsert:true,strict: false},
+										dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": SubDeviceId}, {$set: {"subDevices.$.type": type}}, {upsert:true,strict: false},
+											function(err, doc) {
+												if(err){
+													res.send("unknown" + err);
+												}else{
+													res.send("okay");
+												}
+											}
+										);
+									}else{
+										res.send("autherror");
+									}
+								}
+							})
+						}
+					}
+				})
+			}, function(error){
+				res.send("error");
+			})
+		}else{
+			res.send("Invalid token supplied.");
+		}
+	}catch(e){
+		res.send("error " + e);
+	}
+})
+ 
+app.post('/renameSubDevice', async function (req, res) {
+	try{
+		const userEmail = await getEmail(req.headers);
+		//const userEmail = "sanjeet.pathak990@gmail.com";
+		if(userEmail != undefined && userEmail != null && userEmail != ""){
+			var deviceId = req.body.deviceID;
+			var SubDeviceId = req.body.subDeviceID;
+			var name = req.body.name;
+			var promiseMongo = initDBConnection();
+
+			console.log(deviceId);
+			console.log(SubDeviceId);
+
+			promiseMongo.then(function(dbo){
+				dbo.collection("devices").find({"_id":deviceId, "subDevices":{$elemMatch :{"id" : SubDeviceId}}}).toArray(function(err, result) {
+					if(err){
+						res.send("error");
+					}else{
+						if(result[0] == undefined || result[0] == null){
+							res.send("notexists");
+						}else{
+							dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
+								if(err){
+									res.send("error");
+								}else{
+									if(result[0] == undefined || result[0] == null){
+										res.send("notexists");
+									}else if(result[0]._id == userEmail){
+										dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": SubDeviceId}, {$set: {"subDevices.$.name": name, "subDevices.$.defaultNames": name, "subDevices.$.nicknames": name}}, {upsert:true,strict: false},
 											function(err, doc) {
 												if(err){
 													res.send("unknown" + err);
