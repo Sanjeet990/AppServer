@@ -367,7 +367,7 @@ app.post('/setType', async function (req, res) {
 									if(result[0] == undefined || result[0] == null){
 										res.send("notexists");
 									}else if(result[0]._id == userEmail){
-										dbo.collection("devices").findOneAndUpdate({ _id: deviceId }, {$set: {"subDevices.$.traits": type}}, {upsert:true,strict: false},
+										dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices":{$elemMatch :{"id" : SubDeviceId}}}, {$set: {"subDevices.$.traits": type}}, {upsert:true,strict: false},
 											function(err, doc) {
 												if(err){
 													res.send("unknown" + err);
