@@ -283,7 +283,7 @@ app.post('/remove', async function (req, res) {
 						res.send("error");
 					}else{
 						if(result[0] == undefined || result[0] == null){
-							req.send("notexists");
+							res.send("notexists");
 						}else if(result[0]._id == userEmail){
 							dbo.collection("users").findOneAndUpdate({ _id: userEmail }, {$pop: {devices: deviceId}}, {upsert:true,strict: false},
 								function(err, doc) {
@@ -355,7 +355,7 @@ app.post('/setType', async function (req, res) {
 						res.send("error");
 					}else{
 						if(result[0] == undefined || result[0] == null){
-							req.send("notexists");
+							res.send("notexists");
 						}else{
 							dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
 								if(err){
