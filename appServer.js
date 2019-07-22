@@ -413,14 +413,14 @@ app.post('/renameSubDevice', async function (req, res) {
 						res.send("error");
 					}else{
 						if(result.length < 1){
-							res.send("notexists");
+							res.send("notexistsl");
 						}else{
 							dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
 								if(err){
 									res.send("error");
 								}else{
 									if(result[0] == undefined || result[0] == null){
-										res.send("notexists");
+										res.send("notexists2");
 									}else if(result[0]._id == userEmail){
 										dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": SubDeviceId}, {$set: {"subDevices.$.name": name, "subDevices.$.defaultNames": name, "subDevices.$.nicknames": name}}, {upsert:true,strict: false},
 											function(err, doc) {
