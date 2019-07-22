@@ -412,7 +412,7 @@ app.post('/renameSubDevice', async function (req, res) {
 					if(err){
 						res.send("error");
 					}else{
-						if(result[0] == undefined || result[0] == null){
+						if(result.length < 1){
 							res.send("notexists");
 						}else{
 							dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
