@@ -452,6 +452,8 @@ app.post('/reorder', async function (req, res) {
 			var order = req.body.order;
 			var promiseMongo = initDBConnection();
 
+			console.log(order);
+
 			promiseMongo.then(function(dbo){
 				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
 					if(err){
