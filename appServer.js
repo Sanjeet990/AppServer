@@ -470,7 +470,7 @@ app.post('/reorder', async function (req, res) {
 										}
 									}
 								);
-							}
+							});
 						}else{
 							res.send("autherror");
 						}
