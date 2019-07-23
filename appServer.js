@@ -460,7 +460,7 @@ app.post('/reorder', async function (req, res) {
 						res.send("error");
 					}else{
 						if(result[0] == undefined || result[0] == null){
-						res.send("notexists2");
+						res.send("notexists");
 						}else if(result[0]._id == userEmail){
 							order.forEach(oneDevice => {
 								dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": oneDevice.subDevice}, {$set: {"subDevices.$.order": oneDevice.order}}, {upsert:true,strict: false});
