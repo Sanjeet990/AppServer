@@ -445,14 +445,12 @@ app.post('/renameSubDevice', async function (req, res) {
  
 app.post('/reorder', async function (req, res) {
 	try{
-		//const userEmail = await getEmail(req.headers);
-		const userEmail = "sanjeet.pathak990@gmail.com";
+		const userEmail = await getEmail(req.headers);
+		//const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
 			var order = req.body.order;
 			var promiseMongo = initDBConnection();
-
-			console.log(order);
 
 			promiseMongo.then(function(dbo){
 				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
@@ -463,7 +461,6 @@ app.post('/reorder', async function (req, res) {
 						res.send("notexists2");
 						}else if(result[0]._id == userEmail){
 							order.forEach(oneDevice => {
-								console.log(oneDevice);
 								dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": oneDevice.subDevice}, {$set: {"subDevices.$.order": oneDevice.order}}, {upsert:true,strict: false});
 							});
 							res.send("okay");
