@@ -452,6 +452,8 @@ app.post('/reorder', async function (req, res) {
 			var order = req.body.order;
 			var promiseMongo = initDBConnection();
 
+			console.log(order);
+
 			promiseMongo.then(function(dbo){
 				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
 					if(err){
@@ -461,6 +463,7 @@ app.post('/reorder', async function (req, res) {
 						res.send("notexists2");
 						}else if(result[0]._id == userEmail){
 							order.forEach(oneDevice => {
+								console.log(oneDevice);
 								dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": oneDevice.subDevice}, {$set: {"subDevices.$.order": oneDevice.order}}, {upsert:true,strict: false},
 									function(err, doc) {
 										if(err){
