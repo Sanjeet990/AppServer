@@ -464,16 +464,9 @@ app.post('/reorder', async function (req, res) {
 						}else if(result[0]._id == userEmail){
 							order.forEach(oneDevice => {
 								console.log(oneDevice);
-								dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": oneDevice.subDevice}, {$set: {"subDevices.$.order": oneDevice.order}}, {upsert:true,strict: false},
-									function(err, doc) {
-										if(err){
-											res.send("unknown" + err);
-										}else{
-											res.send("okay");
-										}
-									}
-								);
+								dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": oneDevice.subDevice}, {$set: {"subDevices.$.order": oneDevice.order}}, {upsert:true,strict: false});
 							});
+							res.send("okay");
 						}else{
 							res.send("autherror");
 						}
