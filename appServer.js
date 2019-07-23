@@ -454,8 +454,8 @@ app.post('/reorder', async function (req, res) {
 			var promiseMongo = initDBConnection();
 			var name = "";
 		
-			console.log(order);
-			console.log(SubDeviceId);
+			console.log(order[0]);
+			console.log(order[1]);
 
 			promiseMongo.then(function(dbo){
 				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
