@@ -146,7 +146,7 @@ function prepareDeviceData(userEmail){
 			//console.log("Connected to mongo database. " + dbo.domain);
 			findDevices(userEmail, dbo).then(function(devicex){
 				findSubDevices(devicex, dbo).then(function(subDevice){
-					console.log(JSON.stringify(subDevice, null, 4));
+					//console.log(JSON.stringify(subDevice, null, 4));
 					resolve(subDevice);
 				}, function(error){
 					reject("Error: " + error);
