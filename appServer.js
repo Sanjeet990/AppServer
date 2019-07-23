@@ -449,13 +449,8 @@ app.post('/reorder', async function (req, res) {
 		const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
-			var SubDeviceId = req.body.subDeviceID;
 			var order = req.body.order;
 			var promiseMongo = initDBConnection();
-			var name = "";
-		
-			console.log(order[0]);
-			console.log(order[1]);
 
 			promiseMongo.then(function(dbo){
 				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
@@ -465,15 +460,17 @@ app.post('/reorder', async function (req, res) {
 						if(result[0] == undefined || result[0] == null){
 						res.send("notexists2");
 						}else if(result[0]._id == userEmail){
-							dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": SubDeviceId}, {$set: {"subDevices.$.name": name, "subDevices.$.defaultNames": name, "subDevices.$.nicknames": name}}, {upsert:true,strict: false},
-								function(err, doc) {
-									if(err){
-										res.send("unknown" + err);
-									}else{
-										res.send("okay");
+							order.forEach(oneDevice => {
+								dbo.collection("devices").findOneAndUpdate({ _id: deviceId, "subDevices.id": oneDevice.subDevice}, {$set: {"subDevices.$.order": oneDevice.order}}, {upsert:true,strict: false},
+									function(err, doc) {
+										if(err){
+											res.send("unknown" + err);
+										}else{
+											res.send("okay");
+										}
 									}
-								}
-							);
+								);
+							}
 						}else{
 							res.send("autherror");
 						}
