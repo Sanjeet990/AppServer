@@ -4,7 +4,7 @@ var Promise = require('promise');
 
 var MongoClient = require('mongodb').MongoClient;
 
-var url = "mongodb://HomeAuto:MWHome@2020@44.231.113.196:27017/SmartHome";
+var url = "mongodb://HomeAuto:MWHome%402020@44.231.113.196:27017/SmartHome";
 
 
 var port = process.env.PORT || 3001;
