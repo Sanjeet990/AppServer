@@ -4,7 +4,7 @@ var Promise = require('promise');
 
 var MongoClient = require('mongodb').MongoClient;
 
-var url = "mongodb://marswavehome.tk:27017/smarthome";
+var url = "mongodb://HomeAuto:MWHome@2020@44.231.113.196:27017/SmartHome";
 
 
 var port = process.env.PORT || 3001;
@@ -38,7 +38,7 @@ function initDBConnection(){
 			if (err) {
                 reject(err);
             } else {
-				var dbo = db.db("smarthome");
+				var dbo = db.db("SmartHome");
                 resolve(dbo);
             }
 		})
