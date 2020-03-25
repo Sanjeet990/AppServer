@@ -24,9 +24,11 @@ async function asyncForEach(array, callback) {
 const getEmail = async (headers) => {
 	try{
 		const accessToken = headers.authorization.substr(7);
+		console.log(accessToken);
 		const {email} = await auth0.getProfile(accessToken);
 		return email;
 	}catch(e){
+		console.log("Token Error");
 		return null;
 	}
 }
@@ -220,9 +222,8 @@ app.get('/status', async function (req, res) {
  
 app.post('/add', async function (req, res) {
 	try{
-		//const userEmail = await getEmail(req.headers);
-		console.log(req.headers);
-		const userEmail = "sanjeet.pathak990@gmail.com";
+		const userEmail = await getEmail(req.headers);
+		//const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
 			var secretkey = req.body.secretKey;
