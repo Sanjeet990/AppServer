@@ -221,7 +221,7 @@ app.get('/status', async function (req, res) {
 app.post('/add', async function (req, res) {
 	try{
 		const userEmail = await getEmail(req.headers);
-		Console.log(userEmail);
+		console.log(userEmail);
 		//const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
@@ -229,7 +229,7 @@ app.post('/add', async function (req, res) {
 
 			var promiseMongo = initDBConnection();
 			
-			Console.log(promiseMongo);
+			console.log(promiseMongo);
 			
 			promiseMongo.then(function(dbo){
 				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
@@ -243,7 +243,7 @@ app.post('/add', async function (req, res) {
 								dbo.collection("users").findOneAndUpdate({ _id: userEmail }, {$push: {devices: deviceId}}, {upsert:true,strict: false},
 									function(err, doc) {
 										if(err){
-											Console.log("Unknow");
+											console.log("Unknown");
 											res.send("unknown");
 										}else{
 											res.send("okay");
