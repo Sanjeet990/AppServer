@@ -24,11 +24,11 @@ async function asyncForEach(array, callback) {
 const getEmail = async (headers) => {
 	try{
 		const accessToken = headers.authorization.substr(7);
-		console.log(accessToken);
+		//console.log(accessToken);
 		const {email} = await auth0.getProfile(accessToken);
 		return email;
 	}catch(e){
-		console.log("Token Error");
+		//console.log("Token Error");
 		return null;
 	}
 }
@@ -182,11 +182,13 @@ app.get('/', async function (req, res) {
 				agentUserId: userEmail,
 				devices
 			};
+			console.log(data);
 			res.send(data);
 		}else{
 			res.send("Invalid token supplied.");
 		}
 	}catch(e){
+		console.log(e);
 		res.send("error");
 	}
 })
