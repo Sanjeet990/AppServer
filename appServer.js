@@ -221,16 +221,20 @@ app.get('/status', async function (req, res) {
 app.post('/add', async function (req, res) {
 	try{
 		const userEmail = await getEmail(req.headers);
+		Console.log(userEmail);
 		//const userEmail = "sanjeet.pathak990@gmail.com";
 		if(userEmail != undefined && userEmail != null && userEmail != ""){
 			var deviceId = req.body.deviceID;
 			var secretkey = req.body.secretKey;
 
 			var promiseMongo = initDBConnection();
-
+			
+			Console.log(promiseMongo);
+			
 			promiseMongo.then(function(dbo){
 				dbo.collection("users").find({"devices":{$all :[deviceId]}}).toArray(function(err, result) {
 					if(err){
+						Console.log("Error finding user");
 						res.send("error");
 					}else{
 						if(result[0] == undefined || result[0] == null){
@@ -239,6 +243,7 @@ app.post('/add', async function (req, res) {
 								dbo.collection("users").findOneAndUpdate({ _id: userEmail }, {$push: {devices: deviceId}}, {upsert:true,strict: false},
 									function(err, doc) {
 										if(err){
+											Console.log("Unknow");
 											res.send("unknown");
 										}else{
 											res.send("okay");
